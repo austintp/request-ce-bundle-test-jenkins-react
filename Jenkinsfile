@@ -46,13 +46,15 @@ pipeline {
   }
   post {
     success {
-      mail(subject: "Successful Build: Bundle '${currentBuild.fullDisplayName}'", body: 'Congrats, your recent bundle build was successful!', to: 'scott.gerike@kineticdata.com', from: 'scott.gerike@kineticdata.com')
-
+      script {
+        GIT_COMMIT_EMAIL = sh(returnStdout: true, script: 'git --no-pager show -s --format=%ae').trim()
+        mail(subject: "Successful Build: Bundle '${currentBuild.fullDisplayName}'", body: 'Congrats, your recent bundle build was successful! It is now available in Amazon S3.', to: "${GIT_COMMIT_EMAIL}", from: 'scott.gerike@kineticdata.com')
+      }
     }
 
     failure {
-      mail(subject: "Failed Build: Bundle '${currentBuild.fullDisplayName}'", body: 'Congrats, your recent bundle build failed.', to: 'scott.gerike@kineticdata.com', from: 'scott.gerike@kineticdata.com')
-
+      GIT_COMMIT_EMAIL = sh(returnStdout: true, script: 'git --no-pager show -s --format=%ae').trim()
+        mail(subject: "Failed Build: Bundle '${currentBuild.fullDisplayName}'", body: 'There were errors found in your recent bundle build. Check the Jenkins job or run the tests to see what failed before attempting to build again.', to: "${GIT_COMMIT_EMAIL}", from: 'scott.gerike@kineticdata.com')
     }
 
   }
