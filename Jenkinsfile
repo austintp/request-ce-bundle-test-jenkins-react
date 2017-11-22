@@ -3,13 +3,8 @@ pipeline {
   stages {
     stage('Prepare Environment') {
       steps {
-        echo 'Installing/Updating Yarn and making sure bundle libraries are up to date'
-        sh 'curl -o- -L https://yarnpkg.com/install.sh | bash'
+        echo 'Doing a yarn install'
         sh 'yarn install'
-        echo 'Installing/Updating AWS CLI'
-        sh 'curl -O https://bootstrap.pypa.io/get-pip.py'
-        sh 'python get-pip.py --user'
-        sh '/var/lib/jenkins/.local/bin/pip install awscli --upgrade --user'
         echo 'Setting AWS Credentials in files at ~/.aws for the CLI to use'
         withCredentials(bindings: [[$class: 'UsernamePasswordMultiBinding', credentialsId: 'd9b3e21f-24a7-4d0b-8be8-e55eab29894f', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
           sh 'mkdir -p ~/.aws'
@@ -48,14 +43,15 @@ pipeline {
     success {
       script {
         GIT_COMMIT_EMAIL = sh(returnStdout: true, script: 'git --no-pager show -s --format=%ae').trim()
-        mail(subject: "Successful Build: Bundle '${currentBuild.fullDisplayName}'", body: 'Congrats, your recent bundle build was successful! It is now available in Amazon S3.', to: "${GIT_COMMIT_EMAIL}", from: 'scott.gerike@kineticdata.com')
+        mail(subject: "Successful Build: Bundle '${currentBuild.fullDisplayName}'", body: 'Congrats, your recent bundle build was successful! It is now available in Amazon S3.', to: "${GIT_COMMIT_EMAIL}", from: "KD Jenkins")
       }
     }
 
     failure {
+     script {
       GIT_COMMIT_EMAIL = sh(returnStdout: true, script: 'git --no-pager show -s --format=%ae').trim()
-        mail(subject: "Failed Build: Bundle '${currentBuild.fullDisplayName}'", body: 'There were errors found in your recent bundle build. Check the Jenkins job or run the tests to see what failed before attempting to build again.', to: "${GIT_COMMIT_EMAIL}", from: 'scott.gerike@kineticdata.com')
+        mail(subject: "Failed Build: Bundle '${currentBuild.fullDisplayName}'", body: 'There were errors found in your recent bundle build. Check the Jenkins job or run the tests to see what failed before attempting to build again.', to: "${GIT_COMMIT_EMAIL}", from: "KD Jenkins")
+     }
     }
-
   }
 }
