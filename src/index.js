@@ -10,6 +10,8 @@ import './globals';
 import { AppContainer } from './components/AppContainer';
 import { configureStore } from './redux/store';
 
+// Adding in something so that a commit will be triggered.
+//
 // When getting started, the most important piece is the line that contains:
 //   <Route path="/" component={AppContainer}/>
 // which specifies that the root of the application is to be AppContainer which
