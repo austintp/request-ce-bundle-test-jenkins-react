@@ -11,7 +11,7 @@ pipeline {
           sh '''printf \'%s
 \' \'[default]\' \'output = json\' \'region = us-east-1\' > ~/.aws/config'''
           sh '''printf \'%s
-\' \'[default]\' \'aws_access_key_id = %USERNAME%\' \'aws_secret_access_key = %PASSWORD%\' > ~/.aws/credentials'''
+\' \'[default]\' "aws_access_key_id = $USERNAME" "aws_secret_access_key = $PASSWORD" > ~/.aws/credentials'''
         }
 
       }
