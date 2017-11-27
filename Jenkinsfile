@@ -6,7 +6,7 @@ pipeline {
         echo 'Doing a yarn install'
         sh 'yarn install'
         echo 'Setting AWS Credentials in files at ~/.aws for the CLI to use'
-        withCredentials(bindings: [[$class: 'UsernamePasswordMultiBinding', credentialsId: 'd9b3e21f-24a7-4d0b-8be8-e55eab29894f', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+        withCredentials(bindings: [[$class: 'UsernamePasswordMultiBinding', credentialsId: '7306312f-5257-43bc-8109-923c956df9c1', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
           sh 'mkdir -p ~/.aws'
           sh '''printf \'%s
 \' \'[default]\' \'output = json\' \'region = us-east-1\' > config'''
@@ -28,12 +28,15 @@ pipeline {
       }
     }
     stage('Upload to S3') {
+      when {
+        anyOf {branch 'master'; branch 'develop'}
+      }
       steps {
         script {
-          S3DIR = sh(returnStdout: true, script: 'echo `expr "$GIT_URL" : \'^.*/\\(.*\\)\\.git$\'`').trim()
-          BUCKET = env.BRANCH_NAME == "master" ? "shayne-test1" : "luke-test1"
+          BUNDLE = sh(returnStdout: true, script: 'echo `expr "$GIT_URL" : \'^.*/\\(.*\\)\\.git$\'`').trim()
+          VERSION = env.BRANCH_NAME == "master" ? "v1" : "develop"
           OPTIONS = '--acl public-read --metadata "cache-control=must-revalidate; max-age: 0"'
-          sh "/var/lib/jenkins/.local/bin/aws s3 sync dist s3://${BUCKET}/${S3DIR} ${OPTIONS}"
+          sh "/var/lib/jenkins/.local/bin/aws s3 sync dist s3://kinops.io/bundles/hydrogen/${BUNDLE}/${VERSION} ${OPTIONS}"
         }
 
       }
