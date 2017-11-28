@@ -24,7 +24,7 @@ pipeline {
     }
     stage('Build') {
       steps {
-        echo 'yarn builds here'
+        sh 'yarn run build'
       }
     }
     stage('Upload to S3') {
@@ -33,10 +33,10 @@ pipeline {
       }
       steps {
         script {
-          BUNDLE = sh(returnStdout: true, script: 'echo `expr "$GIT_URL" : \'^.*/\\(.*\\)\\.git$\'`').trim()
+          BUNDLE = sh(returnStdout: true, script: 'echo `expr "$GIT_URL" : \'^.*/request-ce-bundle-\\(.*\\)\\.git$\'`').trim()
           VERSION = env.BRANCH_NAME == "master" ? "v1" : "develop"
           OPTIONS = '--acl public-read --metadata "cache-control=must-revalidate; max-age: 0"'
-          sh "/var/lib/jenkins/.local/bin/aws s3 sync src s3://kinops.io/bundles/hydrogen/${BUNDLE}/${VERSION} ${OPTIONS}"
+          sh "/var/lib/jenkins/.local/bin/aws s3 sync dist s3://kinops.io/bundles/hydrogen/${BUNDLE}/${VERSION} ${OPTIONS}"
         }
 
       }
