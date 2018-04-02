@@ -27,6 +27,8 @@ pipeline {
     stage('Build') {
       steps {
         sh 'yarn run build'
+		sh "pwd"
+		sh "ls -lstra"
       }
     }
     stage('Upload to S3') {
@@ -35,6 +37,9 @@ pipeline {
       }
       steps {
         script {
+		  sh "pwd"
+		  sh "ls -lstra"
+		  
           BUNDLE = sh(returnStdout: true, script: 'echo `expr "$GIT_URL" : \'^.*/request-ce-bundle-\\(.*\\)\\.git$\'`').trim()
           VERSION = env.BRANCH_NAME == "master" ? "v1" : "develop"
           OPTIONS = '--acl public-read --metadata "cache-control=must-revalidate; max-age: 0" --delete'
